@@ -1,4 +1,8 @@
 # CS3203 Notes
+
+[Simple Notes](SimpleReadMe.md)
+[PQL Notes](PQLReadMe.md)
+
 - This notes was created as I find the website too messy (And revision for tests)
 - Feel free to use it / make a PR to contribute
 
