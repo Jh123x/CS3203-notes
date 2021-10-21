@@ -7,6 +7,10 @@
     - [Example with reference to Code 6](#example-with-reference-to-code-6)
   - [`Parent / Parent *`](#parent--parent-)
     - [Examples with reference to Code 6](#examples-with-reference-to-code-6)
+  - [`Uses`](#uses)
+    - [Examples with reference to Code-6](#examples-with-reference-to-code-6-1)
+  - [`Modifies`](#modifies)
+    - [Examples with reference to Code-6](#examples-with-reference-to-code-6-2)
 
 
 # Basic Relations
@@ -112,3 +116,58 @@
 | `Parent*(10, 13)` | Yes    | `Parent(10, 13)` $\to$ `Parent*(10, 13)`     |
 
 Note*: The EG in [Code-6](#code-6) cannot clearly show the `Parent*` relation
+
+## `Uses`
+- `Uses` have different meaning depending on the arguments
+- The right hand side (RHS) of `Uses` must always be a variable
+
+| LHS Design Entity | Definition                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| Assign a          | Holds if `v` appears oh RHS of `a`                                                          |
+| Print P           | Holds if `v` appears in `P`                                                                 |
+| If I              | Holds if `v` appear in conditional stmt or `Uses(s1, v)` holds for any statement within `I` |
+| While w           | Holds if `v` appear in conditional stmt or `Uses(s1, v)` holds for any statement within `w` |
+| Procedure p       | Holds if there is a statement or a called procedure `s` in `p` such that `Uses(s, v)`       |
+| Call C            | Same as `Uses(p, v)`                                                                        |
+
+### Examples with reference to [Code-6](#code-6)
+
+| Relation                       | Holds? | Remarks                                                      |
+| ------------------------------ | ------ | ------------------------------------------------------------ |
+| `Uses(7, "x")`                 | Yes    | `x` appears on the RHS of assign stmt 7                      |
+| `Uses(12, "count")`            | Yes    | `count` appears on RHS of assign stmt 12                     |
+| `Uses(12, "cenX")`             | Yes    | `cenX` appears on RHS of assign stmt 12                      |
+| `Uses(10, "count")`            | Yes    | 12 within else block and `Uses(12, "count")`                 |
+| `Uses(10, "cenX")`             | Yes    | 12 within else block and `Uses(12, "cenX")`                  |
+| `Uses("main", "cenX")`         | Yes    | 12 within procedure `main` and `Uses(12,"cenX")`             |
+| `Uses("main", "flag")`         | Yes    | `main` calls `printResults` which `print flag`               |
+| `Uses("computeCentroid", "x")` | Yes    | `computeCentroid` has stmt 7 which is `cenX = cenX + x;`     |
+| `Uses(3, "count")`             | No     | assign stmt 3 does not have `count` on RHS                   |
+| `Uses(10, "flag")`             | No     | if stmt 10 does not have `flag` on RHS of all its statements |
+| `Uses(9, "y")`                 | No     | procedure `readPoint` does not use `y`                       |
+
+
+## `Modifies`
+- `Modifies` have different meaning depending on the arguments
+- The Right hand side (RHS) of `Modifies` must always be a variable
+
+| LHS Design Entity | Definition                                                                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Assign a          | Holds if `v` appears on LHS of `a`                                                                                                       |
+| Read r            | Holds if `v` appears in `r`                                                                                                              |
+| If I              | Holds if there is a stmt `s` within `I` such that `Modifies(s, v)`                                                                       |
+| While w           | Holds if there is a stmt `s` within `w` such that `Modifies(s, v)`                                                                       |
+| Procedure p       | Holds if there is a stmt `s` within `p` such or `s` within a procedure called directly or indirectly from `p` such that `Modifies(s, v)` |
+| Call c            | Holds if for procedure `p` called in `c`, `Modifies(p, v)` holds                                                                         |
+
+### Examples with reference to [Code-6](#code-6)
+| Relation                             | Holds? | Remarks                                                              |
+| ------------------------------------ | ------ | -------------------------------------------------------------------- |
+| `Modifies(1, "count")`               | Yes    | `count` is on the LHS of assign 1                                    |
+| `Modifies(7, "cenX")`                | Yes    | `cenX` is on the LHS of assign 7                                     |
+| `Modifies(9, "x")`                   | Yes    | `x` is modified in procedure `readPoint`                             |
+| `Modifies(10, "flag")`               | Yes    | `flag` is modified by stmt 11 within stmt 10                         |
+| `Modifies(5, "x")`                   | Yes    | `x` is modified in call 9 within while 5                             |
+| `Modifies("main", "y")`              | Yes    | `y` is modified within `call printResult` within `main`              |
+| `Modifies(5, "flag")`                | No     | `flag` is not modified by any stmt within 5                          |
+| `Modifies("printResults", "normSq")` | No     | `normSq` is not modified by any stmt within procedure `printResults` |
