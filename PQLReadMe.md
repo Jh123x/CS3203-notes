@@ -11,6 +11,13 @@
     - [Examples with reference to Code-6](#examples-with-reference-to-code-6-1)
   - [`Modifies`](#modifies)
     - [Examples with reference to Code-6](#examples-with-reference-to-code-6-2)
+  - [Code 5](#code-5)
+  - [`Calls/Calls*`](#callscalls)
+    - [Examples with reference to Code-5](#examples-with-reference-to-code-5)
+  - [`Next/Next*`](#nextnext)
+    - [Examples with reference to Code 5](#examples-with-reference-to-code-5-1)
+  - [`Affects/Affects*`](#affectsaffects)
+    - [Examples with reference to Code 5](#examples-with-reference-to-code-5-2)
 
 
 # Basic Relations
@@ -171,3 +178,120 @@ Note*: The EG in [Code-6](#code-6) cannot clearly show the `Parent*` relation
 | `Modifies("main", "y")`              | Yes    | `y` is modified within `call printResult` within `main`              |
 | `Modifies(5, "flag")`                | No     | `flag` is not modified by any stmt within 5                          |
 | `Modifies("printResults", "normSq")` | No     | `normSq` is not modified by any stmt within procedure `printResults` |
+
+
+
+## Code 5
+```
+      procedure First {
+      read x;
+      read z;
+      call Second; }
+  
+      procedure Second {
+01        x = 0;
+02        i = 5;
+03        while (i!=0) {
+04            x = x + 2*y;
+05            call Third;
+06            i = i - 1; }
+07        if (x==1) then {
+08            x = x+1; }
+          else {
+09            z = 1; }
+10        z = z + x + i;
+11        y = z + 2;
+12        x = x * y + z; }
+  
+      procedure Third {
+          z = 5;
+          v = z;
+          print v; }
+
+```
+
+
+## `Calls/Calls*`
+- Definition
+  - For any procedure `p` and `q`
+  - `Calls(p, q)` is true if procedure `p` directly calls `q`
+  - `p` Caller procedure
+  - `q` Procedure called
+  - `Calls*` is the transitive closure of `Calls`.
+    - IE: `Calls(a, b) and Calls(b, c)` -> `Calls*(a,c)` 
+    - IE: `Calls(a, b)` -> `Calls*(a,b)`
+  - Some properties
+    - As there can be no recursive statements, `Calls(a, b)` -> `Calls(b, a)` is False
+
+### Examples with reference to [Code-5](#code-5)
+| Relation                    | Holds? | Remarks                                                                           |
+| --------------------------- | ------ | --------------------------------------------------------------------------------- |
+| `Calls("First", "Second")`  | Yes    | On the third line of procedure `First` it calls `Second`.                         |
+| `Calls("Second", "Third")`  | Yes    | At line 5 of procedure `Second` is calls `Third`.                                 |
+| `Calls*("First", "Second")` | Yes    | As `Calls("First", "Second")` is true, -> this is also true.                      |
+| `Calls*("First", "Third")`  | Yes    | As `Calls("First", "Second")` and `Calls("Second", "Third")`, thus its true.      |
+| `Calls("First", "Thrid")`   | No     | There are no statements in procedure `First` that calls `Third`                   |
+| `Calls("Second", "First")`  | No     | There are no statements in procedure `Second` that calls `First`.                 |
+| `Calls*("Second", "First")` | No     | There are no statements from `Second` that directly not indirectly calls `First`. |
+
+
+## `Next/Next*`
+- Definition
+  - For any 2 program lines `p1` and `p2` within the same procedure.
+  - `Next(p1, p2)` is true if `p2` can be executed directly after `p1` in some execution sequence.
+  - `p1` -> First execution statement.
+  - `p2` -> Second execution statement.
+  - `Next*(p1, p2)` is true if `p2` is executed somewhere after `p1`. (Transitive closure of `Next`)
+    - IE: `Next(p1, p2)` and `Next(p2, p3)` -> `Next*(p1, p3)`
+  - Some Properties
+    - `Next(p1, p2)` -/-> not `Next(p2, p1)` due to the existence of while loops
+
+### Examples with reference to [Code 5](#code-5)
+| Relation       | Holds? | Remarks                                                                |
+| -------------- | ------ | ---------------------------------------------------------------------- |
+| `Next(2, 3)`   | Yes    | `3` will execute after `2`.                                            |
+| `Next(3, 4)`   | Yes    | `4` will execute after `3` if it enters the while loop.                |
+| `Next(3, 7)`   | Yes    | `7` can execute after `3` if it does not enter the while loop.         |
+| `Next(5, 6)`   | Yes    | `6` will execute after `5`.                                            |
+| `Next(7, 9)`   | Yes    | `9` can execute after `7` if the statement enters the `else` block.    |
+| `Next(8 ,10)`  | Yes    | `10` will happed after `8` if the execution enters the `if` statement  |
+| `Next*(1, 2)`  | Yes    | As `Next(1, 2)` -> `Next*(1, 2)` is true                               |
+| `Next*(1, 3)`  | Yes    | As `Next(1, 2)` and `Next(2, 3)` -> `Next*(1, 3)`                      |
+| `Next*(2, 5)`  | Yes    | This will be true if the execution enters the while loop               |
+| `Next*(4, 3)`  | Yes    | This will be true if the while loop repeats itself                     |
+| `Next*(5, 5)`  | Yes    | This will be true if the while loop repeats itself                     |
+| `Next*(5, 8)`  | Yes    | This will be true if it enters the while loop and the if statement.    |
+| `Next*(5, 12)` | Yes    | This will be true if it enters the while loop and finished execution.  |
+| `Next(6, 4)`   | No     | They do not occur directly after each other                            |
+| `Next(7, 10)`  | No     | Either the if block or the else block will be executed first.          |
+| `Next(8, 9)`   | No     | They are in different blocks and cannot execute after one another.     |
+| `Next*(8, 9)`  | No     | They are in different blocks and cannot execute after one another.     |
+| `Next*(5, 2)`  | No     | `2` is not part of the loop and thus cannot execute after statement 5. |
+
+## `Affects/Affects*`
+- Definition
+  - It is a relation between assign statements.
+  - `Affects(a1, a2)` holds if
+    - `a1` and `a2` are in the same procedure.
+    - `a1` modifies a variable `v` which `a2` uses.
+    - There is a control flow path from `a1` to `a2` sich that v is not modified in any assign, read, procedure or call statements on that path
+- `Affects*` is the transitive closure of `Affects`
+  - IE: `Affects(a1, a2)` and `Affects(a2, a3)` -> `Affects(a1, a3)`
+
+### Examples with reference to [Code 5](#code-5)
+| Relation         | Holds? | Remarks                                      |
+| ---------------- | ------ | -------------------------------------------- |
+| `Affects(2, 6)`  | Yes    | `2` modifies `i` and `6` uses `i`            |
+| `Affects(4, 8)`  | Yes    | `4` modifies `x` and `8` uses `x`            |
+| `Affects(4, 10)` | Yes    | `4` modifies `x` and `10` uses `x`           |
+| `Affects(6, 6)`  | Yes    | `6` both modifies and uses `i`               |
+| `Affects(1, 4)`  | Yes    | `1` modifies `x` and `4` uses `x`            |
+| `Affects(1, 8)`  | Yes    | `1` modifies `x` and `8` uses `x`            |
+| `Affects(1, 10)` | Yes    | `1` modifies `x` and `10` uses `x`           |
+| `Affects(1, 12)` | Yes    | `1` modifies `x` and `12` uses `x`           |
+| `Affects(2, 10)` | Yes    | `2` modifies `i` and `10` uses `i`           |
+| `Affects(9, 10)` | Yes    | `9` modifies `z` and `10` uses `z`           |
+| `Affects(9, 11)` | No     | `9` does not modify anything that `11` uses. |
+| `Affects(9, 12)` | No     | `9` does not modify anything that `12` uses. |
+| `Affects(2, 3)`  | No     | `2` does not modify anything that `3` uses.  |
+| `Affects(9, 6)`  | No     | `9` happens after `6`                        |
