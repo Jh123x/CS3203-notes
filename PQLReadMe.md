@@ -130,7 +130,7 @@ Note*: The EG in [Code-6](#code-6) cannot clearly show the `Parent*` relation
 
 | LHS Design Entity | Definition                                                                                  |
 | ----------------- | ------------------------------------------------------------------------------------------- |
-| Assign a          | Holds if `v` appears oh RHS of `a`                                                          |
+| Assign a          | Holds if `v` appears of RHS of `a`                                                          |
 | Print P           | Holds if `v` appears in `P`                                                                 |
 | If I              | Holds if `v` appear in conditional stmt or `Uses(s1, v)` holds for any statement within `I` |
 | While w           | Holds if `v` appear in conditional stmt or `Uses(s1, v)` holds for any statement within `w` |
@@ -274,7 +274,7 @@ Note*: The EG in [Code-6](#code-6) cannot clearly show the `Parent*` relation
   - `Affects(a1, a2)` holds if
     - `a1` and `a2` are in the same procedure.
     - `a1` modifies a variable `v` which `a2` uses.
-    - There is a control flow path from `a1` to `a2` sich that v is not modified in any assign, read, procedure or call statements on that path
+    - There is a control flow path from `a1` to `a2` such that v is not modified in any assign, read, procedure or call statements on that path
 - `Affects*` is the transitive closure of `Affects`
   - IE: `Affects(a1, a2)` and `Affects(a2, a3)` -> `Affects(a1, a3)`
 
